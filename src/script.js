@@ -5,16 +5,103 @@ import * as CANNON from 'cannon-es';
 import GUI from 'lil-gui';
 
 /**
+ * Debug
+ */
+const gui = new GUI();
+const debugObject = {};
+
+gui.hide(); //self explanatory
+
+debugObject.createSphere = () => {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 12 + Math.random() * 2;
+
+  createSphere(
+    Math.random() * 0.5 + 0.2,
+    {
+      x: Math.sin(angle) * radius,
+      y: 12,
+      z: Math.cos(angle) * radius,
+    },
+    {
+      x: Math.cos(angle) * radius * 50,
+      y: 15,
+      z: Math.sin(angle) * radius * 50,
+    }
+  );
+  // console.log(
+  //   'x: ' + Math.sin(angle) * radius + ', z: ' + Math.cos(angle) * radius
+  // );
+};
+
+debugObject.reset = () => {
+  for (const object of objectsToUpdate) {
+    // Remove body
+    object.body.removeEventListener('collide', playHitSound);
+    world.removeBody(object.body);
+
+    // Remove mesh
+    scene.remove(object.mesh);
+  }
+  // Clear the array!
+  objectsToUpdate.splice(0, objectsToUpdate.length);
+};
+
+gui.add(debugObject, 'createSphere');
+gui.add(debugObject, 'reset');
+
+/**
  * Base
  */
-// Debug
-const gui = new GUI();
-
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
+
+/**
+ * Audio
+ */
+// const hitSound = [];
+// for (let i = 0; i < 7; i++) {
+//   hitSound[i] = new Audio('./audio/_0' + (i + 1) + '_rock.wav');
+// }
+const hitSound = new Audio('./audio/_02_rock.wav');
+
+const playHitSound = (collision) => {
+  const impactStrength = collision.contact.getImpactVelocityAlongNormal();
+
+  // let currentHitSound = Math.floor(Math.random(7));
+  // console.log(currentHitSound);
+  if (impactStrength > 0.2) {
+    hitSound.volume = Math.random();
+    hitSound.currentTime = 0;
+    hitSound.play();
+  }
+};
+
+/**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+
+const environmentMap = cubeTextureLoader.load([
+  '/textures/environmentMaps/3/px.png',
+  '/textures/environmentMaps/3/nx.png',
+  '/textures/environmentMaps/3/py.png',
+  '/textures/environmentMaps/3/ny.png',
+  '/textures/environmentMaps/3/pz.png',
+  '/textures/environmentMaps/3/nz.png',
+]);
+
+// Environment & background
+scene.environmentIntensity = 1;
+scene.backgroundBlurriness = 0.1;
+scene.backgroundIntensity = 2;
+scene.backgroundRotation.y = 4;
+scene.environment = environmentMap;
+scene.background = environmentMap;
 
 /**
  * Physics
@@ -54,9 +141,11 @@ world.addBody(floorBody);
 const floor = new THREE.Mesh(
   new THREE.PlaneGeometry(10, 10),
   new THREE.MeshStandardMaterial({
-    color: '#444444',
-    metalness: 0,
-    roughness: 0.5,
+    color: '#777777',
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMap,
+    envMapIntensity: 0.5,
   })
 );
 floor.receiveShadow = true;
@@ -107,19 +196,18 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  90,
   sizes.width / sizes.height,
   0.1,
   100
 );
-camera.position.set(4, 5, 4);
+camera.position.set(0, -6, 0);
 scene.add(camera);
 
 /**
  * Controls
  */
 const controls = new OrbitControls(camera, canvas);
-controls.target.set(0, 0.75, 0);
 controls.enableDamping = true;
 
 /**
@@ -139,15 +227,89 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 const objectsToUpdate = [];
 
 // Sphere
-// const sphereGeometry =
+const sphereGeometry = new THREE.SphereGeometry(1, 20, 30);
+const sphereMaterial = new THREE.MeshStandardMaterial({
+  color: 'rgb(65, 82, 54)',
+  metalness: 0.3,
+  roughness: 0.4,
+  envMap: environmentMap,
+});
+
+const createSphere = (radius, position, forceAngle) => {
+  // Three.js mesh
+  const mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  mesh.scale.set(radius, radius, radius);
+  mesh.castShadow = true;
+  mesh.position.copy(position);
+  scene.add(mesh);
+
+  // CANNON.js body
+  const shape = new CANNON.Sphere(radius);
+  const body = new CANNON.Body({
+    mass: 1,
+    position: new CANNON.Vec3(0, 3, 0),
+    shape,
+    material: defaultMaterial,
+  });
+  body.position.copy(position);
+  body.applyLocalForce(forceAngle, new CANNON.Vec3(0, 0, 0));
+
+  // let currentHitSound = Math.floor(Math.random(0, 7));
+  // console.log(currentHitSound);
+
+  body.addEventListener('collide', playHitSound);
+  world.addBody(body);
+
+  // Save in objectsToUpdate
+  objectsToUpdate.push({
+    mesh: mesh,
+    body: body,
+  });
+};
+// createSphere(0.5, { x: 0, y: 3, z: 0 });
+
+// Create shape timer
+(function loop() {
+  let rand = Math.round(Math.random() * (2000 - 150)) + 150;
+  setTimeout(function () {
+    // console.log('Hello World!');
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 12 + Math.random() * 2;
+    createSphere(
+      Math.random() * 0.5 + 0.2,
+      {
+        x: Math.sin(angle) * radius,
+        y: 12,
+        z: Math.cos(angle) * radius,
+      },
+      {
+        x: Math.cos(angle) * radius * 50,
+        y: 15,
+        z: Math.sin(angle) * radius * 50,
+      }
+    );
+    loop();
+  }, rand);
+})();
 
 /**
  * Animate
  */
 const clock = new THREE.Clock();
+let oldElapsedTime = 0;
+
 const tick = () => {
   // Time
   const elapsedTime = clock.getElapsedTime();
+  const deltaTime = elapsedTime - oldElapsedTime;
+  oldElapsedTime = elapsedTime;
+
+  // Update physics
+  world.step(1 / 60, deltaTime, 3);
+  for (const object of objectsToUpdate) {
+    object.mesh.position.copy(object.body.position);
+    object.mesh.quaternion.copy(object.body.quaternion);
+  }
 
   // Update controls
   controls.update();

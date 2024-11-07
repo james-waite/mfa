@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "cannon-es": "^0.20.0",
-    "three": "^0.170.0"
+    "three": "^0.170.0",
+    "vite-plugin-restart": "^0.4.1"
   },
   "devDependencies": {
     "lil-gui": "^0.20.0",
