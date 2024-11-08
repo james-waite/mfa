@@ -10,7 +10,7 @@ import GUI from 'lil-gui';
 const gui = new GUI();
 const debugObject = {};
 
-gui.hide(); //self explanatory
+// gui.hide(); //self explanatory
 
 debugObject.createSphere = () => {
   const angle = Math.random() * Math.PI * 2;
@@ -268,7 +268,7 @@ const createSphere = (radius, position, forceAngle) => {
 };
 // createSphere(0.5, { x: 0, y: 3, z: 0 });
 
-// Create shape timer
+// Create & delete shapes timer
 (function loop() {
   let rand = Math.round(Math.random() * (2000 - 150)) + 150;
   setTimeout(function () {
@@ -289,6 +289,19 @@ const createSphere = (radius, position, forceAngle) => {
       }
     );
     loop();
+    console.log(objectsToUpdate);
+    if (objectsToUpdate.length >= 10) {
+      for (const object of objectsToUpdate) {
+        // Remove body
+        object.body.removeEventListener('collide', playHitSound);
+        world.removeBody(object.body);
+
+        // Remove mesh
+        scene.remove(object.mesh);
+      }
+      // Clear the array!
+      objectsToUpdate.splice(0, 6);
+    }
   }, rand);
 })();
 
