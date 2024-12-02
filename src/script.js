@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFloader.js';
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFloader.js';
 import * as CANNON from 'cannon-es';
 import GUI from 'lil-gui';
 
@@ -74,6 +74,7 @@ const playHitSound = (collision) => {
   // let currentHitSound = Math.floor(Math.random(7));
   // console.log(currentHitSound);
   if (impactStrength > 0.2) {
+    // console.log(collision.body.id);
     hitSound.volume = Math.random();
     hitSound.currentTime = 0;
     hitSound.play();
@@ -127,12 +128,17 @@ world.addContactMaterial(defaultContactMaterial);
 world.defaultContactMaterial = defaultContactMaterial;
 
 // Floor
+const tempFunc = (collision) => {
+  console.log(collision.contact);
+};
+
 const floorShape = new CANNON.Plane();
 const floorBody = new CANNON.Body();
 // floorBody.material = defaultMaterial;
 floorBody.mass = 0; // Tell CANNON it is a static object. Default is 0 so technically can omit.
 floorBody.addShape(floorShape);
 floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5); // Must rotate physics plane like in Three.js but CANNON uses quternions
+floorBody.addEventListener('collide', tempFunc);
 world.addBody(floorBody);
 
 /**
@@ -289,7 +295,7 @@ const createSphere = (radius, position, forceAngle) => {
       }
     );
     loop();
-    console.log(objectsToUpdate);
+    // console.log(objectsToUpdate);
     if (objectsToUpdate.length >= 10) {
       for (const object of objectsToUpdate) {
         // Remove body
