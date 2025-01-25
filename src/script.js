@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFloader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFloader.js';
 import * as CANNON from 'cannon-es';
 import GUI from 'lil-gui';
 
@@ -10,7 +10,7 @@ import GUI from 'lil-gui';
 const gui = new GUI();
 const debugObject = {};
 
-// gui.hide(); //self explanatory
+gui.hide(); //self explanatory
 
 debugObject.createSphere = () => {
   const angle = Math.random() * Math.PI * 2;
@@ -60,12 +60,17 @@ const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
 
 /**
+ * Models
+ */
+const gltfLoader = new GLTFLoader();
+
+// gltfLoader.load('/models/rock.gltf', (gltf) => {
+//   console.log(gltf);
+// });
+
+/**
  * Audio
  */
-// const hitSound = [];
-// for (let i = 0; i < 7; i++) {
-//   hitSound[i] = new Audio('./audio/_0' + (i + 1) + '_rock.wav');
-// }
 const hitSound = new Audio('./audio/_02_rock.wav');
 
 const playHitSound = (collision) => {
@@ -86,6 +91,7 @@ const playHitSound = (collision) => {
  */
 const textureLoader = new THREE.TextureLoader();
 const cubeTextureLoader = new THREE.CubeTextureLoader();
+const imageLoader = new THREE.ImageLoader();
 
 const environmentMap = cubeTextureLoader.load([
   '/textures/environmentMaps/3/px.png',
@@ -128,8 +134,8 @@ world.addContactMaterial(defaultContactMaterial);
 world.defaultContactMaterial = defaultContactMaterial;
 
 // Floor
-const tempFunc = (collision) => {
-  console.log(collision.contact);
+const drawCrack = (collision) => {
+  console.log(collision.contact.rj);
 };
 
 const floorShape = new CANNON.Plane();
@@ -138,7 +144,7 @@ const floorBody = new CANNON.Body();
 floorBody.mass = 0; // Tell CANNON it is a static object. Default is 0 so technically can omit.
 floorBody.addShape(floorShape);
 // floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5); // Must rotate physics plane like in Three.js but CANNON uses quternions
-floorBody.addEventListener('collide', tempFunc);
+floorBody.addEventListener('collide', drawCrack);
 world.addBody(floorBody);
 
 /**
@@ -154,7 +160,8 @@ const floor = new THREE.Mesh(
     envMapIntensity: 0.5,
   })
 );
-floor.receiveShadow = true;
+floor.receiveShadow = false;
+floor.castShadow = false;
 // floor.rotation.x = -Math.PI * 0.5;
 scene.add(floor);
 
@@ -278,22 +285,8 @@ const createSphere = (radius, position, forceAngle) => {
 (function loop() {
   let rand = Math.round(Math.random() * (2000 - 150)) + 150;
   setTimeout(function () {
-    // console.log('Hello World!');
     // const angle = Math.random() * Math.PI * 2;
     const radius = 12 + Math.random() * 2;
-    // createSphere(
-    //   Math.random() * 0.5 + 0.2,
-    //   {
-    //     x: Math.sin(angle) * radius,
-    //     y: 12,
-    //     z: Math.cos(angle) * radius,
-    //   },
-    //   {
-    //     x: Math.cos(angle) * radius * 50,
-    //     y: 15,
-    //     z: Math.sin(angle) * radius * 50,
-    //   }
-    // );
     createSphere(
       Math.random() * 0.3 + 0.2,
       { x: (Math.random() - 0.5) * 8, y: 7, z: 4 },
@@ -315,7 +308,7 @@ const createSphere = (radius, position, forceAngle) => {
         scene.remove(object.mesh);
       }
       // Clear the array!
-      objectsToUpdate.splice(0, 10);
+      objectsToUpdate.splice(0, 6);
     }
   }, rand);
 })();
