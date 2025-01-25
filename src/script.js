@@ -137,7 +137,7 @@ const floorBody = new CANNON.Body();
 // floorBody.material = defaultMaterial;
 floorBody.mass = 0; // Tell CANNON it is a static object. Default is 0 so technically can omit.
 floorBody.addShape(floorShape);
-floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5); // Must rotate physics plane like in Three.js but CANNON uses quternions
+// floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5); // Must rotate physics plane like in Three.js but CANNON uses quternions
 floorBody.addEventListener('collide', tempFunc);
 world.addBody(floorBody);
 
@@ -155,7 +155,7 @@ const floor = new THREE.Mesh(
   })
 );
 floor.receiveShadow = true;
-floor.rotation.x = -Math.PI * 0.5;
+// floor.rotation.x = -Math.PI * 0.5;
 scene.add(floor);
 
 /**
@@ -202,12 +202,12 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  72,
+  78,
   sizes.width / sizes.height,
   0.1,
   100
 );
-camera.position.set(0, 0, -2);
+camera.position.set(0, 0, -2.8);
 scene.add(camera);
 
 /**
@@ -279,7 +279,7 @@ const createSphere = (radius, position, forceAngle) => {
   let rand = Math.round(Math.random() * (2000 - 150)) + 150;
   setTimeout(function () {
     // console.log('Hello World!');
-    const angle = Math.random() * Math.PI * 2;
+    // const angle = Math.random() * Math.PI * 2;
     const radius = 12 + Math.random() * 2;
     // createSphere(
     //   Math.random() * 0.5 + 0.2,
@@ -295,12 +295,12 @@ const createSphere = (radius, position, forceAngle) => {
     //   }
     // );
     createSphere(
-      Math.random() * 0.3 + 0.1,
-      { x: Math.random() * 4, y: 7, z: 2 },
+      Math.random() * 0.3 + 0.2,
+      { x: (Math.random() - 0.5) * 8, y: 7, z: 4 },
       {
-        x: Math.cos(angle) * radius * 2,
-        y: 0,
-        z: Math.sin(angle) * radius * -3,
+        x: 0,
+        y: Math.random() + 1.2,
+        z: Math.random() + radius * -15,
       }
     );
     loop();
