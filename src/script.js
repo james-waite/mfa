@@ -70,7 +70,7 @@ const hitSound = new Audio('./audio/_02_rock.wav');
 
 const playHitSound = (collision) => {
   const impactStrength = collision.contact.getImpactVelocityAlongNormal();
-
+  // console.log(collision);
   // let currentHitSound = Math.floor(Math.random(7));
   // console.log(currentHitSound);
   if (impactStrength > 0.2) {
@@ -202,12 +202,12 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  90,
+  72,
   sizes.width / sizes.height,
   0.1,
   100
 );
-camera.position.set(0, -6, 0);
+camera.position.set(0, 0, -2);
 scene.add(camera);
 
 /**
@@ -281,17 +281,26 @@ const createSphere = (radius, position, forceAngle) => {
     // console.log('Hello World!');
     const angle = Math.random() * Math.PI * 2;
     const radius = 12 + Math.random() * 2;
+    // createSphere(
+    //   Math.random() * 0.5 + 0.2,
+    //   {
+    //     x: Math.sin(angle) * radius,
+    //     y: 12,
+    //     z: Math.cos(angle) * radius,
+    //   },
+    //   {
+    //     x: Math.cos(angle) * radius * 50,
+    //     y: 15,
+    //     z: Math.sin(angle) * radius * 50,
+    //   }
+    // );
     createSphere(
-      Math.random() * 0.5 + 0.2,
+      Math.random() * 0.3 + 0.1,
+      { x: Math.random() * 4, y: 7, z: 2 },
       {
-        x: Math.sin(angle) * radius,
-        y: 12,
-        z: Math.cos(angle) * radius,
-      },
-      {
-        x: Math.cos(angle) * radius * 50,
-        y: 15,
-        z: Math.sin(angle) * radius * 50,
+        x: Math.cos(angle) * radius * 2,
+        y: 0,
+        z: Math.sin(angle) * radius * -3,
       }
     );
     loop();
@@ -306,7 +315,7 @@ const createSphere = (radius, position, forceAngle) => {
         scene.remove(object.mesh);
       }
       // Clear the array!
-      objectsToUpdate.splice(0, 6);
+      objectsToUpdate.splice(0, 10);
     }
   }, rand);
 })();
